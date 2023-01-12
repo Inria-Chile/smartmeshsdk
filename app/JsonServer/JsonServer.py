@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 #============================ adjust path =====================================
 
@@ -21,6 +21,7 @@ import pprint
 import threading
 import json
 import traceback
+import logging
 
 # requirements
 import requests
@@ -34,6 +35,10 @@ from SmartMeshSDK.utils      import JsonManager
 # DustCli
 from dustCli                 import DustCli
 
+#============================= setup ==========================================
+
+logging.basicConfig(filename='JsonServer.log',level=logging.DEBUG)
+
 #============================ helpers =========================================
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -42,9 +47,10 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class JsonServer(object):
     
-    def __init__(self, tcpport, autoaddmgr, autodeletemgr, serialport, configfilename):
+    def __init__(self, hostname, tcpport, autoaddmgr, autodeletemgr, serialport, configfilename):
         
         # store params
+        self.hostname             = hostname
         self.tcpport              = tcpport
         self.autoaddmgr           = autoaddmgr
         self.autodeletemgr        = autodeletemgr
@@ -187,7 +193,7 @@ class JsonServer(object):
             target = self._bottle_try_running_forever,
             args   = (self.websrv.run,),
             kwargs = {
-                'host'          : '127.0.0.1',
+                'host'          : self.hostname,
                 'port'          : self.tcpport,
                 'quiet'         : True,
                 'debug'         : False,
@@ -208,10 +214,13 @@ class JsonServer(object):
                 if err[0]==10013:
                     print 'FATAL: cannot open TCP port {0}.'.format(kwargs['port'])
                     print '    Is another application running on that port?'
+                    logging.error('FATAL: cannot open TCP port {0}.'.format(kwargs['port']))
                 else:
-                    print logError(err)
+                    logging.error(err)
+                    print err
             except Exception as err:
-                print logError(err)
+                logging.error(err)
+                print err
             print '    Trying again in {0} seconds'.format(RETRY_PERIOD),
             for _ in range(RETRY_PERIOD):
                 time.sleep(1)
@@ -469,6 +478,7 @@ class JsonServer(object):
         except requests.exceptions.ConnectionError:
             pass
         except Exception as err:
+            logging.error(err)
             print err
     
 #============================ main ============================================
@@ -478,6 +488,7 @@ def main(args):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('--hostname',       default="0.0.0.0")
     parser.add_argument('--tcpport',        default=8080)
     parser.add_argument('--autoaddmgr',     default=True)
     parser.add_argument('--autodeletemgr',  default=True)
