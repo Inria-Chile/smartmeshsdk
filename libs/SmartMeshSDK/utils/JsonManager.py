@@ -21,7 +21,7 @@ elif os.name=='posix':  # Linux
 import json
 
 from SmartMeshSDK                      import sdk_version
-from SmartMeshSDK.utils                import FormatUtils as u, \
+from SmartMeshSDK.utils                import FormatUtils as u, \list
                                               SerialScanner
 from SmartMeshSDK.IpMgrConnectorSerial import IpMgrConnectorSerial
 from SmartMeshSDK.IpMgrConnectorMux    import IpMgrSubscribe

@@ -160,9 +160,9 @@ class SerialScanner(object):
                     ),
                 )
                 listenThread.name      = 'listenThread@{0}'.format(self.serialport)
-                listenThread.daemon    = True
+                listenThread.daemon    = True  # porque la define como daemon y luego hace join?
                 listenThread.start()
-                listenThread.join(SerialScanner.WAITFORMGRHELLO_TOUT)
+                #listenThread.join(SerialScanner.WAITFORMGRHELLO_TOUT)
                 self.goOn = False
                 serialHandler.close()
                 while listenThread.isAlive():
