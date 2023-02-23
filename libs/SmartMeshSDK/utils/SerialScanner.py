@@ -132,10 +132,11 @@ class SerialScanner(object):
                 time.sleep(self.period)
 
     class _waitForMgrHello(threading.Thread):
-        def __init__(self,serialport,isManager,dataLock):
+        def __init__(self,serialport,isManager,dataLock,period=0.1):
             self.serialport       = serialport
             self.isManager        = isManager
             self.dataLock         = dataLock
+            self.period           = period
             self.goOn             = True
             with self.dataLock:
                 isManager[serialport]=False
@@ -159,13 +160,13 @@ class SerialScanner(object):
                     ),
                 )
                 listenThread.name      = 'listenThread@{0}'.format(self.serialport)
-                listenThread.daemon    = True
+                listenThread.daemon    = True  # porque la define como daemon y luego hace join?
                 listenThread.start()
-                listenThread.join(SerialScanner.WAITFORMGRHELLO_TOUT)
+                #listenThread.join(SerialScanner.WAITFORMGRHELLO_TOUT)
                 self.goOn = False
                 serialHandler.close()
                 while listenThread.isAlive():
-                    pass # wait for listenThread to stop
+                    time.sleep(self.period) # wait for listenThread to stop
             except serial.SerialException:
                 pass # happens when serial port unavailable
         def _listenForMgrHello(self,serialport,serialHandler,isManager,dataLock):
